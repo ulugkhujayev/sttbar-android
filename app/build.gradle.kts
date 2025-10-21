@@ -144,12 +144,14 @@ dependencies {
     implementation(project(":feature_icon_selection:api"))
     implementation(project(":feature_date_selection"))
     implementation(project(":feature_date_selection:api"))
+    implementation(project(":wear_api"))
     "playImplementation"(project(":feature_wear"))
 
     implementation(libs.androidx.room)
     implementation(libs.ktx.navigationFragment)
     implementation(libs.ktx.navigationUi)
     implementation(libs.google.dagger)
+    implementation(libs.nanohttpd)
 
     ksp(libs.kapt.dagger)
     kspAndroidTest(libs.kapt.dagger)
