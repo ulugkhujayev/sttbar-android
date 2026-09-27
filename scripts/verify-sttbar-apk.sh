@@ -32,7 +32,8 @@ if ! grep -Fq "versionName='$version'" <<< "$badging"; then
 fi
 
 signer=$("$tools_dir/apksigner" verify --print-certs "$apk" 2>/dev/null |
-    sed -n 's/^Signer #1 certificate SHA-256 digest: //p' | head -1)
+    sed -nE 's/.*certificate SHA-256 digest: ([0-9a-fA-F]+).*/\1/p' | head -1 |
+    tr '[:upper:]' '[:lower:]')
 expected_signer=3c4e05f91b1f2cebe887a238a85d17c0d838b2cbd6f96f2d5f5ae8e02a0b6200
 if [[ "$signer" != "$expected_signer" ]]; then
     echo "APK signer differs from the installed STTbar build" >&2

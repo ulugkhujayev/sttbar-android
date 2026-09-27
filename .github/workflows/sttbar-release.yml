@@ -23,6 +23,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.tag || github.ref }}
+      - name: Load current release verifier
+        run: |
+          git fetch --depth=1 origin main
+          git show FETCH_HEAD:scripts/verify-sttbar-apk.sh > "$RUNNER_TEMP/verify-sttbar-apk.sh"
+          chmod +x "$RUNNER_TEMP/verify-sttbar-apk.sh"
       - uses: actions/setup-java@v4
         with:
           distribution: zulu
@@ -51,7 +56,7 @@ jobs:
           gh release download "$RELEASE_TAG" --pattern sttbar-android.apk --dir "$RUNNER_TEMP/previous"
           tools_dir=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
           "$tools_dir/apksigner" verify --print-certs "$RUNNER_TEMP/previous/sttbar-android.apk" 2>/dev/null | grep 'certificate SHA-256'
-          scripts/verify-sttbar-apk.sh "$RUNNER_TEMP/previous/sttbar-android.apk" "${RELEASE_TAG#v}"
+          "$RUNNER_TEMP/verify-sttbar-apk.sh" "$RUNNER_TEMP/previous/sttbar-android.apk" "${RELEASE_TAG#v}"
       - name: Test and build signed APK
         env:
           STTBAR_KEYSTORE_PATH: ${{ runner.temp }}/sttbar.keystore
@@ -73,7 +78,7 @@ jobs:
           set -euo pipefail
           version="${RELEASE_TAG#v}"
           apk=app/build/outputs/apk/play/sttbar/app-play-sttbar.apk
-          scripts/verify-sttbar-apk.sh "$apk" "$version"
+          "$RUNNER_TEMP/verify-sttbar-apk.sh" "$apk" "$version"
           mkdir -p dist
           cp "$apk" dist/sttbar-android.apk
           (cd dist && sha256sum sttbar-android.apk > sttbar-android.apk.sha256)
