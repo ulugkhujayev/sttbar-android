@@ -3,6 +3,12 @@ name: STTbar APK release
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to build
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -11,8 +17,12 @@ jobs:
   release:
     runs-on: ubuntu-latest
     timeout-minutes: 75
+    env:
+      RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
       - uses: actions/setup-java@v4
         with:
           distribution: zulu
@@ -26,7 +36,7 @@ jobs:
         run: |
           set -euo pipefail
           version=$(sed -n 's/.*const val versionName = "\([^"]*\)".*/\1/p' buildSrc/src/main/kotlin/com/example/util/simpletimetracker/Base.kt | head -1)
-          test "${GITHUB_REF_NAME}" = "v${version}"
+          test "$RELEASE_TAG" = "v${version}"
           for name in STTBAR_KEYSTORE_B64 STTBAR_STORE_PASSWORD STTBAR_KEY_ALIAS STTBAR_KEY_PASSWORD; do
             test -n "${!name}"
           done
@@ -42,7 +52,7 @@ jobs:
       - name: Verify and stage APK
         run: |
           set -euo pipefail
-          version="${GITHUB_REF_NAME#v}"
+          version="${RELEASE_TAG#v}"
           apk=app/build/outputs/apk/play/sttbar/app-play-sttbar.apk
           scripts/verify-sttbar-apk.sh "$apk" "$version"
           mkdir -p dist
@@ -53,10 +63,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" dist/sttbar-android.apk dist/sttbar-android.apk.sha256 --clobber
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" dist/sttbar-android.apk dist/sttbar-android.apk.sha256 --clobber
           else
-            gh release create "$GITHUB_REF_NAME" dist/sttbar-android.apk dist/sttbar-android.apk.sha256 \
-              --title "STTbar Android $GITHUB_REF_NAME" \
+            gh release create "$RELEASE_TAG" dist/sttbar-android.apk dist/sttbar-android.apk.sha256 \
+              --title "STTbar Android $RELEASE_TAG" \
               --notes "Signed APK for the STTbar phone companion. Install over the previous STTbar debug package."
           fi
