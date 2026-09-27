@@ -42,6 +42,14 @@ jobs:
           done
           printf '%s' "$STTBAR_KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/sttbar.keystore"
           chmod 600 "$RUNNER_TEMP/sttbar.keystore"
+      - name: Check published APK on the runner
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/previous"
+          gh release download "$RELEASE_TAG" --pattern sttbar-android.apk --dir "$RUNNER_TEMP/previous"
+          scripts/verify-sttbar-apk.sh "$RUNNER_TEMP/previous/sttbar-android.apk" "${RELEASE_TAG#v}"
       - name: Test and build signed APK
         env:
           STTBAR_KEYSTORE_PATH: ${{ runner.temp }}/sttbar.keystore
@@ -49,6 +57,15 @@ jobs:
           STTBAR_KEY_ALIAS: ${{ secrets.STTBAR_KEY_ALIAS }}
           STTBAR_KEY_PASSWORD: ${{ secrets.STTBAR_KEY_PASSWORD }}
         run: ./gradlew :app:testPlayDebugUnitTest :domain:test :app:assemblePlaySttbar --no-daemon
+      - name: Report signing certificates
+        env:
+          STTBAR_STORE_PASSWORD: ${{ secrets.STTBAR_STORE_PASSWORD }}
+          STTBAR_KEY_ALIAS: ${{ secrets.STTBAR_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          keytool -list -v -keystore "$RUNNER_TEMP/sttbar.keystore" -storepass "$STTBAR_STORE_PASSWORD" -alias "$STTBAR_KEY_ALIAS" | grep 'SHA256:'
+          tools_dir=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          "$tools_dir/apksigner" verify --print-certs app/build/outputs/apk/play/sttbar/app-play-sttbar.apk 2>/dev/null | grep 'certificate SHA-256 digest'
       - name: Verify and stage APK
         run: |
           set -euo pipefail
