@@ -21,4 +21,4 @@ jobs:
           distribution: zulu
           java-version: '21'
       - name: Test and build
-        run: ./gradlew :app:testPlayDebugUnitTest :domain:test :app:assemblePlayDebug --no-daemon
+        run: ./gradlew :app:testPlayDebugUnitTest :domain:test :app:assemblePlayDebug :app:assembleBaseDebug --no-daemon
