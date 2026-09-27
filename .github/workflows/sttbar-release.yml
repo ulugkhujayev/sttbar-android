@@ -49,6 +49,8 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/previous"
           gh release download "$RELEASE_TAG" --pattern sttbar-android.apk --dir "$RUNNER_TEMP/previous"
+          tools_dir=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          "$tools_dir/apksigner" verify --print-certs "$RUNNER_TEMP/previous/sttbar-android.apk" 2>/dev/null | grep 'certificate SHA-256'
           scripts/verify-sttbar-apk.sh "$RUNNER_TEMP/previous/sttbar-android.apk" "${RELEASE_TAG#v}"
       - name: Test and build signed APK
         env:
