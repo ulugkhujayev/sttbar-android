@@ -1,6 +1,7 @@
 package com.example.util.simpletimetracker.feature_settings.interactor
 
 import com.example.util.simpletimetracker.core.provider.ApplicationDataProvider
+import com.example.util.simpletimetracker.core.manager.AppUpdateManager
 import com.example.util.simpletimetracker.core.repo.ResourceRepo
 import com.example.util.simpletimetracker.feature_base_adapter.ViewHolderType
 import com.example.util.simpletimetracker.feature_settings.R
@@ -14,6 +15,7 @@ import javax.inject.Inject
 class SettingsRatingViewDataInteractor @Inject constructor(
     private val resourceRepo: ResourceRepo,
     private val applicationDataProvider: ApplicationDataProvider,
+    private val appUpdateManager: AppUpdateManager,
 ) {
 
     fun execute(
@@ -55,8 +57,17 @@ class SettingsRatingViewDataInteractor @Inject constructor(
             block = SettingsBlock.Version,
             title = resourceRepo.getString(R.string.settings_version),
             subtitle = loadVersionName(),
-            dividerIsVisible = debugUnlocked,
+            dividerIsVisible = appUpdateManager.isAvailable || debugUnlocked,
         )
+
+        if (appUpdateManager.isAvailable) {
+            result += SettingsTextViewData(
+                block = SettingsBlock.CheckForUpdates,
+                title = resourceRepo.getString(R.string.settings_check_for_updates),
+                subtitle = resourceRepo.getString(R.string.settings_check_for_updates_hint),
+                dividerIsVisible = debugUnlocked,
+            )
+        }
 
         if (debugUnlocked) {
             result += SettingsTextViewData(

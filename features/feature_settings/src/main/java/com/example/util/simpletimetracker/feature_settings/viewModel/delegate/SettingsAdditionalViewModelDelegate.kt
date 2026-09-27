@@ -4,9 +4,12 @@ import androidx.lifecycle.LiveData
 import com.example.util.simpletimetracker.core.base.ViewModelDelegate
 import com.example.util.simpletimetracker.core.extension.lazySuspend
 import com.example.util.simpletimetracker.core.extension.set
+import com.example.util.simpletimetracker.core.manager.ClipboardManager
+import com.example.util.simpletimetracker.core.manager.WebApiManager
 import com.example.util.simpletimetracker.core.repo.ResourceRepo
 import com.example.util.simpletimetracker.domain.extension.flip
 import com.example.util.simpletimetracker.domain.prefs.interactor.PrefsInteractor
+import com.example.util.simpletimetracker.domain.webApi.interactor.WebApiTokenInteractor
 import com.example.util.simpletimetracker.domain.notifications.interactor.UpdateExternalViewsInteractor
 import com.example.util.simpletimetracker.domain.record.interactor.RecordsContainerUpdateInteractor
 import com.example.util.simpletimetracker.feature_base_adapter.ViewHolderType
@@ -18,6 +21,7 @@ import com.example.util.simpletimetracker.feature_settings.mapper.SettingsAutoma
 import com.example.util.simpletimetracker.feature_settings.mapper.SettingsMapper
 import com.example.util.simpletimetracker.feature_settings.viewModel.SettingsViewModel
 import com.example.util.simpletimetracker.navigation.Router
+import com.example.util.simpletimetracker.navigation.params.notification.SnackBarParams
 import com.example.util.simpletimetracker.navigation.params.screen.ActivitySuggestionsParams
 import com.example.util.simpletimetracker.navigation.params.screen.ShortcutsParams
 import com.example.util.simpletimetracker.navigation.params.screen.ComplexRulesParams
@@ -31,6 +35,9 @@ import kotlin.math.abs
 class SettingsAdditionalViewModelDelegate @Inject constructor(
     private val router: Router,
     private val prefsInteractor: PrefsInteractor,
+    private val webApiManager: WebApiManager,
+    private val webApiTokenInteractor: WebApiTokenInteractor,
+    private val clipboardManager: ClipboardManager,
     private val resourceRepo: ResourceRepo,
     private val settingsMapper: SettingsMapper,
     private val settingsAutomatedTrackingMapper: SettingsAutomatedTrackingMapper,
@@ -72,6 +79,9 @@ class SettingsAdditionalViewModelDelegate @Inject constructor(
             SettingsBlock.AdditionalKeepStatisticsRange -> onKeepStatisticsRangeClicked()
             SettingsBlock.AdditionalRetroactiveTrackingMode -> onRetroactiveTrackingModeClicked()
             SettingsBlock.AdditionalSendEvents -> onAutomatedTrackingSendEventsClicked()
+            SettingsBlock.AdditionalWebApiEnabled -> onWebApiEnabledClicked()
+            SettingsBlock.AdditionalWebApiToken -> onWebApiTokenClicked()
+            SettingsBlock.AdditionalWebApiTokenRegenerate -> onWebApiTokenRegenerateClicked()
             SettingsBlock.AdditionalKeepScreenOn -> onKeepScreenOnClicked()
             SettingsBlock.AdditionalStartTimerByLongClick -> onStartTimerByLongClickClicked()
             SettingsBlock.AdditionalDataEdit -> onDataEditClick()
@@ -272,6 +282,37 @@ class SettingsAdditionalViewModelDelegate @Inject constructor(
         delegateScope.launch {
             val newValue = !prefsInteractor.getAutomatedTrackingSendEvents()
             prefsInteractor.setAutomatedTrackingSendEvents(newValue)
+            parent?.updateContent()
+        }
+    }
+
+    private fun onWebApiEnabledClicked() {
+        delegateScope.launch {
+            val newValue = !prefsInteractor.getWebApiEnabled()
+            prefsInteractor.setWebApiEnabled(newValue)
+            if (newValue) {
+                webApiManager.start()
+            } else {
+                webApiManager.stop()
+            }
+            parent?.updateContent()
+        }
+    }
+
+    private fun onWebApiTokenClicked() {
+        delegateScope.launch {
+            clipboardManager.send(webApiTokenInteractor.getOrCreate())
+            SnackBarParams(
+                message = resourceRepo.getString(R.string.copied_to_clipboard),
+                duration = SnackBarParams.Duration.ExtraShort,
+            ).let(router::show)
+        }
+    }
+
+    private fun onWebApiTokenRegenerateClicked() {
+        delegateScope.launch {
+            // Clients that hold the old token get 401 from the next request on.
+            webApiTokenInteractor.regenerate()
             parent?.updateContent()
         }
     }

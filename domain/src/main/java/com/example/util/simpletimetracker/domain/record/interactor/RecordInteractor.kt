@@ -91,9 +91,10 @@ class RecordInteractor @Inject constructor(
         }
     }
 
-    suspend fun add(record: Record) {
+    suspend fun add(record: Record): Long {
         val recordId = recordRepo.add(record)
         updateTags(recordId, record.tags)
+        return recordId
     }
 
     suspend fun update(

@@ -126,7 +126,8 @@
             flex-wrap: wrap;
         }
 
-        input[type="text"] {
+        input[type="text"],
+        input[type="password"] {
             flex: 1;
             min-width: 250px;
             padding: 12px 16px;
@@ -138,7 +139,8 @@
             transition: border-color 0.3s;
         }
 
-        input[type="text"]:focus {
+        input[type="text"]:focus,
+        input[type="password"]:focus {
             outline: none;
             border-color: var(--info);
         }
@@ -615,6 +617,7 @@
     <div class="server-config">
         <div class="input-group">
             <input type="text" id="serverUrl" placeholder="http://192.168.1.X:8080" />
+            <input type="password" id="apiToken" placeholder="Web API token (Settings > Additional)" />
             <button class="btn-primary" onclick="connectToServer()">
                 🔗 Connect
             </button>
@@ -698,11 +701,13 @@
 <script>
     // Configuration
     let serverUrl = localStorage.getItem('serverUrl') || '';
+    let apiToken = localStorage.getItem('apiToken') || '';
     let updateInterval = null;
     let currentTab = 'activities';
 
     // Initialize
     document.getElementById('serverUrl').value = serverUrl;
+    document.getElementById('apiToken').value = apiToken;
     if (serverUrl) {
         connectToServer();
     }
@@ -741,6 +746,14 @@
         }
     }
 
+    // Every request carries the bearer token, the phone rejects requests without it.
+    function apiFetch(path, options = {}) {
+        const headers = Object.assign({}, options.headers || {}, {
+            'Authorization': `Bearer ${apiToken}`
+        });
+        return fetch(`${serverUrl}${path}`, Object.assign({}, options, { headers }));
+    }
+
     // Server Connection
     function connectToServer() {
         serverUrl = document.getElementById('serverUrl').value.trim();
@@ -749,7 +762,14 @@
             return;
         }
 
+        apiToken = document.getElementById('apiToken').value.trim();
+        if (!apiToken) {
+            showError('Please enter the Web API token from the app settings');
+            return;
+        }
+
         localStorage.setItem('serverUrl', serverUrl);
+        localStorage.setItem('apiToken', apiToken);
         hideError();
         updateConnectionStatus(true, 'Connecting...');
 
@@ -789,7 +809,7 @@
                 document.getElementById('loading-activities').classList.remove('hidden');
             }
 
-            const response = await fetch(`${serverUrl}/api/activities`);
+            const response = await apiFetch(`/api/activities`);
             if (!response.ok) throw new Error('Failed to fetch activities');
 
             const activities = await response.json();
@@ -847,7 +867,7 @@
                 document.getElementById('loading-running').classList.remove('hidden');
             }
 
-            const response = await fetch(`${serverUrl}/api/running`);
+            const response = await apiFetch(`/api/running`);
             if (!response.ok) throw new Error('Failed to fetch running activities');
 
             const running = await response.json();
@@ -917,7 +937,7 @@
         try {
             document.getElementById('loading-history').classList.remove('hidden');
 
-            const response = await fetch(`${serverUrl}/api/running`);
+            const response = await apiFetch(`/api/running`);
             if (!response.ok) throw new Error('Failed to fetch');
 
             const data = await response.json();
@@ -971,11 +991,11 @@
 
             // For now, we'll calculate from running activities
             // In a full implementation, you'd call the statistics endpoint
-            const response = await fetch(`${serverUrl}/api/activities`);
+            const response = await apiFetch(`/api/activities`);
             if (!response.ok) throw new Error('Failed to fetch');
 
             const activities = await response.json();
-            const runningResponse = await fetch(`${serverUrl}/api/running`);
+            const runningResponse = await apiFetch(`/api/running`);
             const running = await runningResponse.json();
 
             const container = document.getElementById('stats');
@@ -1016,7 +1036,7 @@
     // Load Suggestions
     async function loadSuggestions() {
         try {
-            const response = await fetch(`${serverUrl}/api/running`);
+            const response = await apiFetch(`/api/running`);
             if (!response.ok) return;
 
             const data = await response.json();
@@ -1032,7 +1052,7 @@
     async function toggleActivity(id, isRunning) {
         try {
             const endpoint = isRunning ? 'stop' : 'start';
-            const response = await fetch(`${serverUrl}/api/${endpoint}/${id}`, {
+            const response = await apiFetch(`/api/${endpoint}/${id}`, {
                 method: 'POST'
             });
 
@@ -1056,7 +1076,7 @@
     // Repeat Last Activity
     async function repeatLastActivity() {
         try {
-            const response = await fetch(`${serverUrl}/api/repeat`, {
+            const response = await apiFetch(`/api/repeat`, {
                 method: 'POST'
             });
 

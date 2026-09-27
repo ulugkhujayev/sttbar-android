@@ -17,6 +17,15 @@ applyAndroidLibrary()
 android {
     namespace = Base.namespace
 
+    signingConfigs {
+        create("sttbar") {
+            System.getenv("STTBAR_KEYSTORE_PATH")?.let { storeFile = file(it) }
+            storePassword = System.getenv("STTBAR_STORE_PASSWORD")
+            keyAlias = System.getenv("STTBAR_KEY_ALIAS")
+            keyPassword = System.getenv("STTBAR_KEY_PASSWORD")
+        }
+    }
+
     defaultConfig {
         applicationId = Base.applicationId
         versionCode = Base.versionCode
@@ -46,6 +55,12 @@ android {
                 "proguard-rules.pro",
             )
         }
+        create("sttbar") {
+            initWith(getByName("release"))
+            applicationIdSuffix = ".debug"
+            signingConfig = signingConfigs.getByName("sttbar")
+            matchingFallbacks += listOf("release")
+        }
     }
 
     buildTypes {
@@ -53,6 +68,9 @@ android {
             buildConfigField("String", "VERSION_NAME", "\"${defaultConfig.versionName}\"")
         }
         release {
+            buildConfigField("String", "VERSION_NAME", "\"${defaultConfig.versionName}\"")
+        }
+        getByName("sttbar") {
             buildConfigField("String", "VERSION_NAME", "\"${defaultConfig.versionName}\"")
         }
     }
@@ -151,10 +169,14 @@ dependencies {
     implementation(libs.ktx.navigationFragment)
     implementation(libs.ktx.navigationUi)
     implementation(libs.google.dagger)
-    implementation(libs.nanohttpd)
+    "playImplementation"(libs.nanohttpd)
 
     ksp(libs.kapt.dagger)
     kspAndroidTest(libs.kapt.dagger)
+
+    testImplementation(libs.test.junit)
+    testImplementation(libs.test.mockitoKotlin)
+    testImplementation(libs.test.json)
 
     androidTestImplementation(libs.uitest.junit)
     androidTestImplementation(libs.uitest.espresso)

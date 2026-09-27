@@ -387,6 +387,14 @@ class PrefsRepoImpl @Inject constructor(
         KEY_AUTOMATED_TRACKING_SEND_EVENTS, false,
     )
 
+    override var webApiEnabled: Boolean by prefs.delegate(
+        KEY_WEB_API_ENABLED, false,
+    )
+
+    override var webApiToken: String by prefs.delegate(
+        KEY_WEB_API_TOKEN, "",
+    )
+
     override var automaticBackupUri: String by prefs.delegate(
         KEY_AUTOMATIC_BACKUP_URI, "",
     )
@@ -809,6 +817,8 @@ class PrefsRepoImpl @Inject constructor(
         const val KEY_AUTOSTART_POMODORO_ACTIVITIES = "autostartPomodoroActivities"
         const val KEY_RECORD_TAG_SELECTION_CLOSE_AFTER_ONE = "recordTagSelectionCloseAfterOne"
         const val KEY_AUTOMATED_TRACKING_SEND_EVENTS = "automatedTrackingSendEvents"
+        private const val KEY_WEB_API_ENABLED = "webApiEnabled" // Device local, not in backup.
+        private const val KEY_WEB_API_TOKEN = "webApiToken" // Device local, not in backup.
         const val KEY_REPEAT_BUTTON_TYPE = "repeatButtonType"
         const val KEY_WIDGET_TRANSPARENCY_PERCENT = "widgetTransparencyPercent"
         const val KEY_DEFAULT_TYPES_HIDDEN = "defaultTypesHidden"

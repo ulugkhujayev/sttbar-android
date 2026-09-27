@@ -1,19 +1,23 @@
 package com.example.util.simpletimetracker.api
 
+import com.example.util.simpletimetracker.core.manager.WebApiManager
+import com.example.util.simpletimetracker.core.manager.AppUpdateManager
+import com.example.util.simpletimetracker.update.AppUpdateManagerImpl
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object WebApiModule {
-    @Provides
-    @Singleton
-    fun provideWebApiAdapter(
-        wearApi: com.example.util.simpletimetracker.wear_api.WearCommunicationAPI
-    ): WebApiAdapter {
-        return WebApiAdapter(wearApi)
-    }
+interface WebApiModule {
+
+    @Binds
+    fun bindWebApiManager(impl: WebApiManagerImpl): WebApiManager
+
+    @Binds
+    fun bindWebApiRecordsInteractor(impl: WebApiRecordsInteractorImpl): WebApiRecordsInteractor
+
+    @Binds
+    fun bindAppUpdateManager(impl: AppUpdateManagerImpl): AppUpdateManager
 }

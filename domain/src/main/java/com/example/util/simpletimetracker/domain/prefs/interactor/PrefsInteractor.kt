@@ -825,6 +825,22 @@ class PrefsInteractor @Inject constructor(
         prefsRepo.automatedTrackingSendEvents = value
     }
 
+    suspend fun getWebApiEnabled(): Boolean = withContext(Dispatchers.IO) {
+        prefsRepo.webApiEnabled
+    }
+
+    suspend fun setWebApiEnabled(value: Boolean) = withContext(Dispatchers.IO) {
+        prefsRepo.webApiEnabled = value
+    }
+
+    suspend fun getWebApiToken(): String = withContext(Dispatchers.IO) {
+        prefsRepo.webApiToken
+    }
+
+    suspend fun setWebApiToken(value: String) = withContext(Dispatchers.IO) {
+        prefsRepo.webApiToken = value
+    }
+
     suspend fun setWidget(widgetId: Int, recordType: Long) = withContext(Dispatchers.IO) {
         prefsRepo.setWidget(widgetId, recordType)
     }

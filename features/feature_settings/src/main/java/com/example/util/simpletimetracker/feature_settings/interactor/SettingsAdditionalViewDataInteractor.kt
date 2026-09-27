@@ -1,9 +1,11 @@
 package com.example.util.simpletimetracker.feature_settings.interactor
 
 import com.example.util.simpletimetracker.core.extension.shiftTimeStamp
+import com.example.util.simpletimetracker.core.manager.WebApiManager
 import com.example.util.simpletimetracker.core.mapper.TimeMapper
 import com.example.util.simpletimetracker.core.repo.ResourceRepo
 import com.example.util.simpletimetracker.domain.prefs.interactor.PrefsInteractor
+import com.example.util.simpletimetracker.domain.webApi.interactor.WebApiTokenInteractor
 import com.example.util.simpletimetracker.feature_base_adapter.ViewHolderType
 import com.example.util.simpletimetracker.feature_settings.R
 import com.example.util.simpletimetracker.feature_settings.api.SettingsBlock
@@ -30,6 +32,8 @@ class SettingsAdditionalViewDataInteractor @Inject constructor(
     private val settingsMapper: SettingsMapper,
     private val prefsInteractor: PrefsInteractor,
     private val timeMapper: TimeMapper,
+    private val webApiManager: WebApiManager,
+    private val webApiTokenInteractor: WebApiTokenInteractor,
 ) {
 
     suspend fun execute(
@@ -188,6 +192,31 @@ class SettingsAdditionalViewDataInteractor @Inject constructor(
                 isChecked = prefsInteractor.getAutomatedTrackingSendEvents(),
                 topSpaceIsVisible = false,
             )
+            if (webApiManager.isAvailable) {
+                result += SettingsCheckboxViewData(
+                    block = SettingsBlock.AdditionalWebApiEnabled,
+                    title = resourceRepo.getString(R.string.settings_web_api),
+                    subtitle = resourceRepo.getString(R.string.settings_web_api_description),
+                    isChecked = prefsInteractor.getWebApiEnabled(),
+                    bottomSpaceIsVisible = false,
+                    dividerIsVisible = false,
+                )
+                result += SettingsTextViewData(
+                    block = SettingsBlock.AdditionalWebApiToken,
+                    title = resourceRepo.getString(R.string.settings_web_api_token),
+                    subtitle = webApiTokenInteractor.getOrCreate(),
+                    hint = resourceRepo.getString(R.string.settings_web_api_token_hint),
+                    topSpaceIsVisible = false,
+                    bottomSpaceIsVisible = false,
+                    dividerIsVisible = false,
+                )
+                result += SettingsTextViewData(
+                    block = SettingsBlock.AdditionalWebApiTokenRegenerate,
+                    title = resourceRepo.getString(R.string.settings_web_api_token_regenerate),
+                    subtitle = "",
+                    topSpaceIsVisible = false,
+                )
+            }
             result += SettingsTextViewData(
                 block = SettingsBlock.AdditionalDataEdit,
                 title = resourceRepo.getString(R.string.settings_data_edit),

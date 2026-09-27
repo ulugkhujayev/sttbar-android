@@ -197,3 +197,22 @@ Joseph Hale https://jhale.dev, [@kantahrek](https://github.com/kantahrek), Anton
 This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at https://mozilla.org/MPL/2.0/.
+## STTbar Android fork
+
+This fork adds a local Web API for the separate sttbar Mac app. The upstream Simple Time Tracker source and GPL license remain below.
+
+The STTbar APK uses package `com.razeeman.util.simpletimetracker.debug`, so it can update the debug build already installed on the phone. Version `1.59.1` uses version code `144` and the same signing certificate as that build. Install the first [STTbar release APK](https://github.com/ulugkhujayev/sttbar-android/releases/latest) manually. Later, open Settings, tap **Check for updates**, and let Android confirm the install. The app checks the latest public GitHub Release, downloads `sttbar-android.apk`, verifies its SHA-256 digest, package name, and version code, then opens Android's installer.
+
+The Web API is off by default. Enable it in Settings, then copy the token to the Mac app. The server listens on port 8080 on the local network. Use a trusted Wi-Fi network or Tailscale because local HTTP does not encrypt the token.
+
+### Build and release
+
+Use JDK 21 and the Android SDK. To build an installable APK locally, set `STTBAR_KEYSTORE_PATH`, `STTBAR_STORE_PASSWORD`, `STTBAR_KEY_ALIAS`, and `STTBAR_KEY_PASSWORD`, then run `./gradlew :app:assemblePlaySttbar`. The APK is `app/build/outputs/apk/play/sttbar/app-play-sttbar.apk`. `scripts/verify-sttbar-apk.sh` checks its package, version, and signing certificate. Keep the signing key outside Git; changing it prevents upgrades over existing installs.
+
+Pushes to `main` run Android tests and a Play debug build. To publish an update, raise `versionCode` and `versionName` in `buildSrc/src/main/kotlin/com/example/util/simpletimetracker/Base.kt`, push the change, then push a matching `v<versionName>` tag. The tag workflow tests, builds with the repository signing secrets, verifies the APK, and attaches it and a SHA-256 file to a GitHub Release. The required secrets are `STTBAR_KEYSTORE_B64`, `STTBAR_STORE_PASSWORD`, `STTBAR_KEY_ALIAS`, and `STTBAR_KEY_PASSWORD`.
+
+### Current limits
+
+The Web API and Mac offline queue are still being audited. In particular, Android currently deduplicates offline uploads by record content instead of `clientId`, and re-pairing the Mac can mix queued records between phones. Do not rely on offline sync for irreplaceable records until those paths are fixed.
+
+---

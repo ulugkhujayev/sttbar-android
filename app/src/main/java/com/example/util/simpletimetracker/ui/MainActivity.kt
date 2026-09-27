@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import androidx.activity.viewModels
 import com.example.util.simpletimetracker.core.base.BaseActivity
 import com.example.util.simpletimetracker.core.manager.ThemeManager
+import com.example.util.simpletimetracker.core.manager.WebApiManager
 import com.example.util.simpletimetracker.core.provider.ContextProvider
 import com.example.util.simpletimetracker.feature_views.extension.visible
 import com.example.util.simpletimetracker.navigation.Router
@@ -25,7 +26,17 @@ class MainActivity : BaseActivity<Binding>() {
     @Inject
     lateinit var router: Router
 
+    @Inject
+    lateinit var webApiManager: WebApiManager
+
     private val viewModel: MainActivityViewModel by viewModels()
+
+    override fun onStart() {
+        super.onStart()
+        // Foreground service start is only allowed while the app is visible,
+        // so this is the place to (re)start the Web API after a process death.
+        webApiManager.start()
+    }
 
     override fun onResume() {
         super.onResume()

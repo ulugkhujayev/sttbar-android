@@ -1,6 +1,7 @@
 package com.example.util.simpletimetracker.feature_settings.viewModel.delegate
 
 import com.example.util.simpletimetracker.core.base.ViewModelDelegate
+import com.example.util.simpletimetracker.core.manager.AppUpdateManager
 import com.example.util.simpletimetracker.core.provider.ApplicationDataProvider
 import com.example.util.simpletimetracker.core.repo.ResourceRepo
 import com.example.util.simpletimetracker.feature_settings.api.SettingsBlock
@@ -20,6 +21,7 @@ class SettingsRatingViewModelDelegate @Inject constructor(
     private val router: Router,
     private val resourceRepo: ResourceRepo,
     private val applicationDataProvider: ApplicationDataProvider,
+    private val appUpdateManager: AppUpdateManager,
     private val settingsRatingViewDataInteractor: SettingsRatingViewDataInteractor,
 ) : ViewModelDelegate() {
 
@@ -45,6 +47,7 @@ class SettingsRatingViewModelDelegate @Inject constructor(
             SettingsBlock.SupportDevelopment -> onSupportDevelopmentClick()
             SettingsBlock.Feedback -> onFeedbackClick()
             SettingsBlock.Version -> onVersionClick()
+            SettingsBlock.CheckForUpdates -> appUpdateManager.openUpdateScreen()
             SettingsBlock.DebugMenu -> onDebugMenuClick()
             else -> {
                 // Do nothing

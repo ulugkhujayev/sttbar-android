@@ -411,6 +411,21 @@ This allows you to see how much time you\'re spending on productive versus unpro
     <string name="settings_feedback">Feedback</string>
     <string name="settings_feedback_description">Have a suggestion? Found a bug? Want to talk? Write us!</string>
     <string name="settings_version">Version</string>
+    <string name="settings_check_for_updates">Check for updates</string>
+    <string name="settings_check_for_updates_hint">Get the latest STTbar APK from GitHub</string>
+    <string name="update_title">STTbar updates</string>
+    <string name="update_installed_version">Installed version %1$s</string>
+    <string name="update_checking">Checking GitHub Releases…</string>
+    <string name="update_available">Version %1$s is available.</string>
+    <string name="update_current">You have the latest version.</string>
+    <string name="update_download">Download and install</string>
+    <string name="update_downloading">Downloading and checking APK…</string>
+    <string name="update_ready">APK is ready to install.</string>
+    <string name="update_install">Install downloaded APK</string>
+    <string name="update_allow_installs">Allow installs from this app, then tap Install downloaded APK.</string>
+    <string name="update_retry">Check again</string>
+    <string name="update_close">Close</string>
+    <string name="update_failed">Update failed: %1$s</string>
     <string name="settings_email_chooser_title">Send with…</string>
     <string name="settings_translators">Translators</string>
     <string name="settings_contributors">Other contributors</string>
@@ -446,6 +461,14 @@ If <b>\"%s\"</b> setting is enabled, app will send events on activity started or
     <string name="settings_automated_tracking_find_with_activity">additionally selects record by activity name, if there are several current or last records.</string>
     <string name="settings_automated_tracking_goal_type">type of goal.</string>
     <string name="settings_automated_tracking_goal_value">goal value, duration in seconds or number of records.</string>
+
+    <string name="settings_web_api">Web API</string>
+    <string name="settings_web_api_description">Local HTTP server on port 8080. Other devices on the same network can view and control tracking with the token below.</string>
+    <string name="settings_web_api_token">Web API token</string>
+    <string name="settings_web_api_token_hint">Tap to copy</string>
+    <string name="settings_web_api_token_regenerate">Regenerate Web API token</string>
+    <string name="web_api_notification_channel_name">Web API</string>
+    <string name="web_api_notification_title">Web API is running</string>
 
     <string name="settings_save_backup">Save backup</string>
     <string name="settings_save_description">Before saving, make sure that you have the latest version of the app installed to avoid conflicts.</string>

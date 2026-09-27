@@ -14,6 +14,7 @@ enum class SettingsBlock {
     SupportDevelopment,
     Feedback,
     Version,
+    CheckForUpdates,
     DebugMenu,
     RatingBottom,
 
@@ -87,6 +88,9 @@ enum class SettingsBlock {
     AdditionalShiftStartOfDayHint,
     AdditionalAutomatedTracking,
     AdditionalSendEvents,
+    AdditionalWebApiEnabled,
+    AdditionalWebApiToken,
+    AdditionalWebApiTokenRegenerate,
     AdditionalDataEdit,
     AdditionalComplexRules,
     AdditionalActivitySuggestions,
